@@ -102,8 +102,10 @@ def gpt_answer(question):
                 {"role": "system", "content": "당신은 의료 상담 전문가입니다. 정확하고 전문적인 답변을 제공해주세요. 모든 답변은 한글로 작성해주세요."},
                 {"role": "user", "content": question}
             ],
-            temperature=0.7,
-            max_tokens=1000
+            temperature=0.5,
+            max_tokens=1000,
+            timeout=4.5 #제한시간 4.5초 
+
         )
         return response.choices[0].message.content
     except Exception as e:

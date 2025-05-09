@@ -74,7 +74,7 @@ def gpt_answer(question):
                 {"role": "system", "content": "당신은 의료 상담 전문가입니다. 정확하고 전문적인 답변을 제공해주세요."},
                 {"role": "user", "content": question}
             ],
-            temperature=0.7,
+            temperature=0.5,
             max_tokens=1000
         )
         return response.choices[0].message.content
