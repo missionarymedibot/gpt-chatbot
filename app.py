@@ -1,6 +1,6 @@
 import streamlit as st
 import sqlite3
-import openai
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from contextlib import contextmanager
@@ -25,8 +25,8 @@ if __name__ == "__main__":
 load_dotenv()
 
 # Get API key from environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
-if not openai.api_key:
+OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+if not OpenAI.api_key:
     st.error("OPENAI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
     st.stop()
 
@@ -94,7 +94,7 @@ def gpt_answer(question):
             return similar_a  # 답변만 반환
         
         # ✅ 최신 SDK 방식으로 OpenAI client 생성
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         response = client.chat.completions.create(
             model="gpt-4",

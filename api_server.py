@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import openai
+from openai import OpenAI
 import os
 import sqlite3
 from contextlib import contextmanager
@@ -11,8 +11,8 @@ import sys
 # Load environment variables
 
 # OpenAI API 설정
-openai.api_key = os.getenv("OPENAI_API_KEY")
-if not openai.api_key:
+OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+if not OpenAI.api_key:
     print("OPENAI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.", file=sys.stderr)
     raise RuntimeError("OPENAI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
 
@@ -66,7 +66,7 @@ def gpt_answer(question):
         if similar_q:
             return similar_a
         
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         response = client.chat.completions.create(
             model="gpt-4",
