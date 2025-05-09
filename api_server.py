@@ -115,7 +115,8 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
                 ]
             }
         }
-        return response
+        return JSONResponse(content=response)
+    
     except Exception as e:
         print("❗[ERROR in /api/chat]:", e)
         raise HTTPException(status_code=500, detail=str(e))
