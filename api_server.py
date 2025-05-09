@@ -13,6 +13,9 @@ load_dotenv()
 
 # OpenAI API 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    print("OPENAI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.", file=sys.stderr)
+    raise RuntimeError("OPENAI_API_KEY가 설정되지 않았습니다. .env 파일을 확인해주세요.")
 
 app = FastAPI()
 
@@ -130,6 +133,7 @@ async def chat(request: ChatRequest):
         
         return response
     except Exception as e:
+        print("❗[ERROR in /api/chat]:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 # 서버 상태 확인
