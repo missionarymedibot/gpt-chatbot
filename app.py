@@ -103,7 +103,7 @@ def gpt_answer(question):
                 {"role": "user", "content": question}
             ],
             temperature=0.5,
-            max_tokens=1000,
+            max_tokens=300,
             timeout=4.5 #제한시간 4.5초 
 
         )
