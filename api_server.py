@@ -77,7 +77,7 @@ def gpt_answer(question):
             temperature=0.7,
             max_tokens=1000
         )
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
     except Exception as e:
         print("❗ GPT 호출 오류:", e)
         raise HTTPException(status_code=500, detail=str(e))

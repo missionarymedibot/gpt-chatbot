@@ -105,7 +105,7 @@ def gpt_answer(question):
             temperature=0.7,
             max_tokens=1000
         )
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
     except Exception as e:
         st.error(f"GPT 응답 생성 중 오류가 발생했습니다: {str(e)}")
         return None
