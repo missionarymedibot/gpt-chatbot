@@ -1,6 +1,5 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import BackgroundTasks
 from pydantic import BaseModel
 from openai import OpenAI
 import os
@@ -8,8 +7,6 @@ import sqlite3
 from contextlib import contextmanager
 from difflib import SequenceMatcher
 import sys
-
-# Load environment variables
 
 # OpenAI API 설정
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
@@ -19,16 +16,14 @@ if not OpenAI.api_key:
 
 app = FastAPI()
 
-# CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 실제 운영시에는 특정 도메인만 허용하도록 수정
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Database context manager
 @contextmanager
 def get_db_connection():
     conn = sqlite3.connect("qa.db")
@@ -37,7 +32,6 @@ def get_db_connection():
     finally:
         conn.close()
 
-# 유사도 계산 함수
 def similar(a, b):
     a_words = set(a.split())
     b_words = set(b.split())
@@ -47,7 +41,6 @@ def similar(a, b):
         return 0.0
     return len(common_words) / total_words
 
-# 유사한 질문 찾기
 def find_similar_question(question, threshold=0.8):
     with get_db_connection() as conn:
         c = conn.cursor()
@@ -59,16 +52,13 @@ def find_similar_question(question, threshold=0.8):
                 return saved_q, saved_a
     return None, None
 
-# GPT 응답 생성 함수
 def gpt_answer(question):
     try:
-        # 유사한 질문 확인
         similar_q, similar_a = find_similar_question(question)
         if similar_q:
             return similar_a
         
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -76,15 +66,13 @@ def gpt_answer(question):
                 {"role": "user", "content": question}
             ],
             temperature=0.5,
-            max_tokens=300,
-            timeout=4.5 #제한시간 4.5초
+            max_tokens=300
         )
         return response.choices[0].message.content
     except Exception as e:
         print("❗ GPT 호출 오류:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
-# 응답 저장 함수
 def save_answer(question, answer, approved=True):
     try:
         with get_db_connection() as conn:
@@ -98,30 +86,22 @@ def save_answer(question, answer, approved=True):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# 요청 모델
 class ChatRequest(BaseModel):
     userRequest: dict
     bot: dict
     action: dict
 
-# 응답 모델
 class ChatResponse(BaseModel):
     version: str = "2.0"
     template: dict
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     try:
-        # 사용자 메시지 추출
         user_message = request.userRequest.get("utterance", "")
-        
-        # GPT 응답 생성
         answer = gpt_answer(user_message)
-        
-        # 👉 비동기적으로 저장 처리
         background_tasks.add_task(save_answer, user_message, answer)
 
-        # 👉 먼저 응답부터 카카오에 반환 (지연 방지)
         response = {
             "version": "2.0",
             "template": {
@@ -134,17 +114,15 @@ async def chat(request: ChatRequest):
                 ]
             }
         }
-        
         return response
     except Exception as e:
         print("❗[ERROR in /api/chat]:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
-# 서버 상태 확인
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000)
