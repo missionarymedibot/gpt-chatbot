@@ -117,10 +117,10 @@ async def chat(request: ChatRequest):
         # GPT 응답 생성
         answer = gpt_answer(user_message)
         
-        # 응답 저장
-        save_answer(user_message, answer)
-        
-        # 카카오톡 응답 형식
+        # 👉 비동기적으로 저장 처리
+        background_tasks.add_task(save_answer, user_message, answer)
+
+        # 👉 먼저 응답부터 카카오에 반환 (지연 방지)
         response = {
             "version": "2.0",
             "template": {
