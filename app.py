@@ -97,7 +97,7 @@ def gpt_answer(question):
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "당신은 의료 상담 전문가입니다. 정확하고 전문적인 답변을 제공해주세요. 모든 답변은 한글로 작성해주세요."},
                 {"role": "user", "content": question}
@@ -120,7 +120,7 @@ def save_answer(question, answer, approved=True):
             c.execute("""
                 INSERT INTO qa_dataset (question, answer, source, approved) 
                 VALUES (?, ?, ?, ?)
-            """, (question, answer, "GPT-4", approved))
+            """, (question, answer, "GPT-3.5-turbo", approved))
             conn.commit()
             return True
     except Exception as e:
