@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import sqlite3
 from contextlib import contextmanager
 from difflib import SequenceMatcher
+import sys
 
 # Load environment variables
 load_dotenv()
