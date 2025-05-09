@@ -108,7 +108,7 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
                 "outputs": [
                     {
                         "simpleText": {
-                            "text": answer
+                            "text": str(answer) if answer else "답변을 생성할 수 없습니다. 다시 시도해주세요."
                         }
                     }
                 ]
