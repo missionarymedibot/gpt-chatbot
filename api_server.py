@@ -3,14 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
 import os
-from dotenv import load_dotenv
 import sqlite3
 from contextlib import contextmanager
 from difflib import SequenceMatcher
 import sys
 
 # Load environment variables
-load_dotenv()
 
 # OpenAI API 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -67,9 +65,11 @@ def gpt_answer(question):
         similar_q, similar_a = find_similar_question(question)
         if similar_q:
             return similar_a
+        
+        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "당신은 의료 상담 전문가입니다. 정확하고 전문적인 답변을 제공해주세요."},
                 {"role": "user", "content": question}
@@ -79,6 +79,7 @@ def gpt_answer(question):
         )
         return response['choices'][0]['message']['content']
     except Exception as e:
+        print("❗ GPT 호출 오류:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 # 응답 저장 함수
